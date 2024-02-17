@@ -3,7 +3,7 @@ import "./App.css";
 import { Todo, createTodo } from "./apis/crud";
 
 function App() {
-  const [todo, setTodo] = useState<Todo[]>([]);
+  const [todoList, setTodoList] = useState<Todo[]>([]);
 
   // input에 들어갈 데이터 useState
   const [text, setText] = useState<string>("");
@@ -21,7 +21,7 @@ function App() {
     if (text === "") return;
     const createdData = await createTodo({ title: text });
     if (createdData && typeof createdData === "object")
-      setTodo((beforetoDos) => [...beforetoDos, createdData]);
+      setTodoList((beforetoDos) => [...beforetoDos, createdData]);
     setText("");
   };
 
@@ -35,6 +35,12 @@ function App() {
   const handleEnter = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "enter") return;
   };
+
+  // 수정하기 버튼 이벤트 함수
+  //
+  const handleClickEdit = () => {};
+  // 삭제하기 버튼 이벤트 함수
+  const handleClickRemove = () => {};
 
   return (
     // 줄별로 div에 담기. 바디 안에 H2
@@ -57,13 +63,21 @@ function App() {
       </div>
       {/* List 박스 줄 투두리스트와 Done리스트 */}
       <div>
-        {/* 박스내용 넣기 li ul  */}
+        {/* 박스내용 넣기 li ul map함수로 toDo 배열생성 */}
+        {/* 수정 삭제 버튼*/}
         <div>
           <li className="toDoList">
-            <ul></ul>
-          </li>
-          <li className="doneList">
-            <ul></ul>
+            {todoList.map((todo) => (
+              <div>
+                <div>{todo.title}</div>
+                <div>
+                  {/* 버튼 이벤트 추가하기 */}
+                  <button>생성일자</button>
+                  <button onClick={handleClickEdit}>수정하기</button>
+                  <button onClick={handleClickRemove}>삭제하기</button>
+                </div>
+              </div>
+            ))}
           </li>
         </div>
       </div>
