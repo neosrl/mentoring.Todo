@@ -3,6 +3,7 @@ import "./App.css";
 import { Todo, createTodo, editTodo, getTodoList } from "./apis/crud";
 import React from "react";
 import Modal from "react-modal";
+// import dateFormat from "./components/dateFormat";
 
 function App() {
   const [todoList, setTodoList] = useState<Todo[]>([]);
@@ -20,7 +21,7 @@ function App() {
 
   // 수정창 useState
   const [areaText, setAreaText] = useState(modal.title);
-
+  console.log(areaText);
   // 화면 렌더링 get 함수 useEffect
   useEffect(() => {
     async () => {
@@ -28,6 +29,8 @@ function App() {
       setTodoList(resData);
     };
   }, []);
+
+  //
 
   // 타이핑값 다루는 함수
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,41 +61,46 @@ function App() {
   };
 
   //수정 요청하기
-
   const requestEdit = async () => {
     const resData = await editTodo(modal.id, {
       title: areaText,
       done: modal.done,
     });
-
-    if (resData && typeof resData === "object") console.log(resData);
-    // setTodoList(res);
+    // 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
+    const updateChild = (updatedChild: Todo) => {
+      setTodoList(
+        todoList.map((child) =>
+          child.id === updatedChild.id ? updatedChild : child
+        )
+      );
+    };
+    if (resData && typeof resData === "object") {
+      updateChild(resData);
+    }
     setModalIsOpen(false);
+    setAreaText("");
     setModal({ id: "", title: "", done: false || true });
   };
 
   // 수정하기 버튼 클릭 이벤트 함수
-  const handleSubmitEdit = () => {
+  const handleSubmitEdit = (e: React.ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!areaText) return;
     requestEdit();
   };
 
   //  삭제하기 버튼 이벤트 함수
-  // const handleClickRemove = () => {};
+  const handleClickRemove = () => {};
 
   // 날짜변환 -> Fail...
-  // console.log(todoList[0].createdAt);
-  // const tranferDate = todoList.map((list) => list.createdAt).toLocaleString;
 
   // 모달창 구현하기
 
-  const openModal = () => {
-    setModalIsOpen(true);
-  };
-
   // 모달 취소버튼 이벤트 함수
-  const closeModal = () => {
+  const closeModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     setModalIsOpen(false);
+    setAreaText("");
   };
   // 모달창 input text 이벤트 함수
   const handleModalText = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,28 +144,25 @@ function App() {
               <div>{todo.title}</div>
               <div>{todo.createdAt}</div>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   setModal({ id: todo.id, title: todo.title, done: todo.done });
-                  openModal();
+                  setModalIsOpen(true);
                 }}
               >
                 수정하기
               </button>
+              <button onClick={handleClickRemove}>삭제하기</button>
               <div>
                 <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
-                  <h2>모달 제목</h2>
+                  <h2>수정하기 모달창 ^__^</h2>
                   <form onSubmit={handleSubmitEdit}>
-                    <input
-                      value={areaText}
-                      defaultValue={modal.title}
-                      onChange={handleModalText}
-                    />
-
+                    <input value={areaText} onChange={handleModalText} />
                     <button type="submit">수정</button>
+                    <button onClick={closeModal}>취소</button>
                   </form>
                 </Modal>
               </div>
-              {/* <button onClick={handleClickRemove}>삭제하기</button> */}
             </div>
           ))}
         </li>
