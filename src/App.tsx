@@ -18,7 +18,7 @@ function App() {
   // inputbar에 들어갈 데이터 useState
   const [text, setText] = useState("");
   console.log(text);
-
+  console.log(todoList);
   // 수정창 useState
   const [areaText, setAreaText] = useState(modal.title);
   console.log(areaText);
@@ -30,8 +30,27 @@ function App() {
     };
   }, []);
 
-  //
-
+  // 날짜변환 -> CHatGPT에게 질문..
+  // new Intl.DateTimeFormat('en-GB', {
+  //     dateStyle: 'full',
+  //     timeStyle: 'long',
+  //     timeZone: 'Australia/Sydney',
+  //   }).format(date),
+  // );
+  const localeDateString = (tododate: string) => {
+    const dateString = tododate;
+    const date = new Date(dateString);
+    const koreanDate = date.toLocaleDateString("ko-KR", {
+      weekday: "short",
+      year: "2-digit",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    return koreanDate; // Output: "2024년 2월 19일 화요일"
+  };
   // 타이핑값 다루는 함수
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -40,18 +59,18 @@ function App() {
 
   // 요청하는 함수 ""일때 리턴 , 반환값 트루 and 타입 object 시 렌더링되도록 set
   // create data는 객체.. 기존배열에서 전개해서 넣어줘야됨
-  const requestHandle = async () => {
+  const requestCreate = async () => {
     if (text === "") return;
     const createdData = await createTodo({ title: text });
     if (createdData && typeof createdData === "object")
-      setTodoList((beforetoDos) => [...beforetoDos, createdData]);
+      setTodoList((beforetoDos) => [createdData, ...beforetoDos]);
     setText("");
   };
 
   // 클릭시 요청 되는것. 클릭하고 요청함수 실행 리렌더링되나 실험
   const handleClickButton = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    requestHandle();
+    requestCreate();
   };
 
   // 엔터키 입력시 요청되는것 엔터키 이외 리턴,
@@ -60,18 +79,18 @@ function App() {
     requestHandle();
   };
 
-  // toDO에서 done으로 서로 변경할 수 있게 
+  // toDO에서 done으로 서로 변경할 수 있게
   // Done : boolean 바꾸기, 기존 순서에서 정렬 어떻게 할건지,
-  const handleChangeDoneClick = (e : React.) => {
-    if()
-  }
+  // const handleChangeDoneClick = (e : React.) => {
+  //   if()
+  // }
 
-// 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
-  const replaceTargetChild = (List: Array<Todo>, updatedChild:Todo) => {
+  // 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
+  const replaceTargetChild = (List: Array<Todo>, updatedChild: Todo) => {
     return List.map((child: Todo) =>
       child.id === updatedChild!.id ? updatedChild : child
-    )  
-};
+    );
+  };
   //수정 요청하기
   const requestEdit = async () => {
     const resData = await editTodo(modal.id, {
@@ -80,9 +99,9 @@ function App() {
     });
     if (!(resData && typeof resData === "object")) return; // 타입가드
     if (resData.done === false) {
-      setTodoList(replaceTargetChild(todoList,resData));
+      setTodoList(replaceTargetChild(todoList, resData));
     } else {
-      setDoneList(replaceTargetChild(todoList,resData));
+      setDoneList(replaceTargetChild(todoList, resData));
     }
     setModalIsOpen(false);
     setAreaText("");
@@ -98,8 +117,6 @@ function App() {
 
   //  삭제하기 버튼 이벤트 함수
   const handleClickRemove = () => {};
-
-  // 날짜변환 -> Fail...
 
   // 모달창 구현하기
 
@@ -142,14 +159,16 @@ function App() {
       <div>
         {/* 박스내용 넣기 li ul map함수로 toDo 배열생성 */}
         {/* 수정 삭제 버튼*/}
+
         <li className="toDoList">
+          <span>ToDo</span>
           {todoList.map((todo) => (
             // Todo wrapper display flex
             // Todo 고유key값 안넣으면 map돌릴때 child 고유성없다고 에러
 
             <div key={todo.id}>
               <div>{todo.title}</div>
-              <div>{todo.createdAt}</div>
+              <div>{localeDateString(todo.createdAt)}</div>
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -163,7 +182,10 @@ function App() {
             </div>
           ))}
         </li>
-        <li className="doneList"></li>
+
+        <li className="doneList">
+          <span>Done</span>
+        </li>
       </div>
       {/* 모달창 어떻게 구현할지.... */}
       {/* 클릭한 toDo의 ID값 지정해서 연결? */}
