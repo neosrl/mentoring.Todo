@@ -43,7 +43,7 @@ function App() {
     //   }
     // };
     // fetchData();
-  }, []);
+  }, [doneList]);
 
   // 날짜변환 -> CHatGPT에게 질문..
   // new Intl.DateTimeFormat('en-GB', {
@@ -96,9 +96,14 @@ function App() {
 
   // toDO에서 done으로 서로 변경할 수 있게
   // Done : boolean => !boolean 바꾸기, 기존 순서에서 정렬 어떻게 할건지,
-  // const handleChangeDoneClick = (item) => {
-  //   if(item.id === id)
-  // }
+  const handleChangeDoneClick = async (
+    id: string,
+    title: string,
+    done: boolean
+  ) => {
+    const changeDoneRes = await editTodo(id, { title: title, done: !done });
+    console.log(changeDoneRes);
+  };
 
   // 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
   const replaceTargetChild = (List: Array<Todo>, updatedChild: Todo) => {
@@ -201,7 +206,13 @@ function App() {
               <button onClick={() => handleClickRemove(todo.id, todo.done)}>
                 삭제하기
               </button>
-              <button>완료변경</button>
+              <button
+                onClick={() =>
+                  handleChangeDoneClick(todo.id, todo.title, todo.done)
+                }
+              >
+                완료변경
+              </button>
             </div>
           ))}
         </li>
@@ -223,7 +234,13 @@ function App() {
               <button onClick={() => handleClickRemove(todo.id, todo.done)}>
                 삭제하기
               </button>
-              <button>미완료변경</button>
+              <button
+                onClick={() =>
+                  handleChangeDoneClick(todo.id, todo.title, todo.done)
+                }
+              >
+                미완료변경
+              </button>
             </div>
           ))}
         </li>
