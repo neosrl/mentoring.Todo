@@ -54,8 +54,8 @@ function App() {
   // );
   const localeDateString = (tododate: string) => {
     const dateString = tododate;
-    const date = new Date(dateString);
-    const koreanDate = date.toLocaleDateString("ko-KR", {
+    const localeDate = new Date(dateString);
+    const koreanDate = localeDate.toLocaleDateString("ko-KR", {
       weekday: "short",
       year: "2-digit",
       month: "long",
@@ -66,6 +66,7 @@ function App() {
     });
     return koreanDate; // Output: "2024년 2월 19일 화요일"
   };
+
   // 타이핑값 다루는 함수
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -83,8 +84,7 @@ function App() {
   };
 
   // 클릭시 요청 되는것. 클릭하고 요청함수 실행 리렌더링되나 실험
-  const handleClickButton = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleClickButton = () => {
     requestCreate();
   };
 
@@ -96,13 +96,23 @@ function App() {
 
   // toDO에서 done으로 서로 변경할 수 있게
   // Done : boolean => !boolean 바꾸기, 기존 순서에서 정렬 어떻게 할건지,
+
+  // 날짜 sort compo
+  const sortList = (todoList: Todo[]) => {
+    const transDate = (dateAt: string) => new Date(dateAt);
+    todoList.sort(
+      (a, b) =>
+        transDate(a.createdAt).valueOf() - transDate(b.createdAt).valueOf()
+    );
+  };
+
   const handleChangeDoneClick = async (
     id: string,
     title: string,
     done: boolean
   ) => {
-    const changeDoneRes = await editTodo(id, { title: title, done: !done });
-    console.log(changeDoneRes);
+    const doneRes = await editTodo(id, { title: title, done: !done });
+    if (!doneRes) return;
   };
 
   // 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
@@ -223,8 +233,7 @@ function App() {
               <div>{todo.title}</div>
               <div>{localeDateString(todo.createdAt)}</div>
               <button
-                onClick={(e) => {
-                  e.preventDefault;
+                onClick={() => {
                   setModal({ id: todo.id, title: todo.title, done: todo.done });
                   setModalIsOpen(true);
                 }}
