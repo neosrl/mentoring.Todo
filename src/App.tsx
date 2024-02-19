@@ -7,7 +7,7 @@ import Modal from "react-modal";
 
 function App() {
   const [todoList, setTodoList] = useState<Todo[]>([]);
-
+  const [doneList, setDoneList] = useState<Todo[]>([]);
   // 모달상태관리 값, 함수들 모달에 띄울 toDo 할당
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modal, setModal] = useState({
@@ -16,7 +16,7 @@ function App() {
     done: false,
   });
   // inputbar에 들어갈 데이터 useState
-  const [text, setText] = useState<string>("");
+  const [text, setText] = useState("");
   console.log(text);
 
   // 수정창 useState
@@ -60,22 +60,29 @@ function App() {
     requestHandle();
   };
 
+  // toDO에서 done으로 서로 변경할 수 있게 
+  // Done : boolean 바꾸기, 기존 순서에서 정렬 어떻게 할건지,
+  const handleChangeDoneClick = (e : React.) => {
+    if()
+  }
+
+// 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
+  const replaceTargetChild = (List: Array<Todo>, updatedChild:Todo) => {
+    return List.map((child: Todo) =>
+      child.id === updatedChild!.id ? updatedChild : child
+    )  
+};
   //수정 요청하기
   const requestEdit = async () => {
     const resData = await editTodo(modal.id, {
       title: areaText,
       done: modal.done,
     });
-    // 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
-    const updateChild = (updatedChild: Todo) => {
-      setTodoList(
-        todoList.map((child) =>
-          child.id === updatedChild.id ? updatedChild : child
-        )
-      );
-    };
-    if (resData && typeof resData === "object") {
-      updateChild(resData);
+    if (!(resData && typeof resData === "object")) return; // 타입가드
+    if (resData.done === false) {
+      setTodoList(replaceTargetChild(todoList,resData));
+    } else {
+      setDoneList(replaceTargetChild(todoList,resData));
     }
     setModalIsOpen(false);
     setAreaText("");
@@ -153,24 +160,24 @@ function App() {
                 수정하기
               </button>
               <button onClick={handleClickRemove}>삭제하기</button>
-              <div>
-                <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
-                  <h2>수정하기 모달창 ^__^</h2>
-                  <form onSubmit={handleSubmitEdit}>
-                    <input value={areaText} onChange={handleModalText} />
-                    <button type="submit">수정</button>
-                    <button onClick={closeModal}>취소</button>
-                  </form>
-                </Modal>
-              </div>
             </div>
           ))}
         </li>
+        <li className="doneList"></li>
       </div>
       {/* 모달창 어떻게 구현할지.... */}
       {/* 클릭한 toDo의 ID값 지정해서 연결? */}
       {/* 버튼 이벤트 추가하기 */}
-
+      <div>
+        <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
+          <h2>수정하기 모달창 ^__^</h2>
+          <form onSubmit={handleSubmitEdit}>
+            <input value={areaText} onChange={handleModalText} />
+            <button type="submit">수정</button>
+            <button onClick={closeModal}>취소</button>
+          </form>
+        </Modal>
+      </div>
       {/* {modal.id && typeof modal === "object" ? <ModalCompo /> : null} */}
     </div>
   );
