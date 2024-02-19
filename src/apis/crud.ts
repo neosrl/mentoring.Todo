@@ -1,11 +1,16 @@
 import axios from "axios";
-import fomatedDate from "@/components/dateFormat";
+
+// headers: {
+//   'content-type': 'application/json',
+//   'apikey': 'KDT7_GrZ1eYBo', // KDT 7기 APIKEY 입니다!
+//   'username': 'KDT7_ParkYoungWoong'
+// },
 
 const baseURL =
   "https://asia-northeast3-heropy-api.cloudfunctions.net/api/todos";
 
-const apikey = "KDT5_nREmPe9B";
-const username = "KDT5_SongSuYeon";
+const apikey = "KDT7_GrZ1eYBo";
+const username = "KDT7_GongHyunJun";
 
 const headers = {
   "content-type": "application/json",

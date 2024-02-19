@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
-import { Todo, createTodo, editTodo, getTodoList } from "./apis/crud";
-import React from "react";
+import {
+  Todo,
+  createTodo,
+  deleteTodo,
+  editTodo,
+  getTodoList,
+} from "./apis/crud";
 import Modal from "react-modal";
-// import dateFormat from "./components/dateFormat";
 
 function App() {
   const [todoList, setTodoList] = useState<Todo[]>([]);
@@ -17,17 +21,28 @@ function App() {
   });
   // inputbar에 들어갈 데이터 useState
   const [text, setText] = useState("");
-  console.log(text);
-  console.log(todoList);
   // 수정창 useState
   const [areaText, setAreaText] = useState(modal.title);
-  console.log(areaText);
+
   // 화면 렌더링 get 함수 useEffect
+
   useEffect(() => {
-    async () => {
-      const resData = await getTodoList();
-      setTodoList(resData);
-    };
+    (async () => {
+      const resGet = await getTodoList();
+      setTodoList(resGet.filter((todo) => !todo.done));
+      setDoneList(resGet.filter((todo) => todo.done));
+    })();
+
+    // const fetchData = async () => {
+    //   try {
+    //     const resGet = await getTodoList();
+    //     setTodoList(resGet.filter((todo) => !todo.done));
+    //     setDoneList(resGet.filter((todo) => todo.done));
+    //   } catch (error) {
+    //     console.error("Error fetching data:", error);
+    //   }
+    // };
+    // fetchData();
   }, []);
 
   // 날짜변환 -> CHatGPT에게 질문..
@@ -76,13 +91,13 @@ function App() {
   // 엔터키 입력시 요청되는것 엔터키 이외 리턴,
   const handleEnter = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "enter") return;
-    requestHandle();
+    requestCreate();
   };
 
   // toDO에서 done으로 서로 변경할 수 있게
-  // Done : boolean 바꾸기, 기존 순서에서 정렬 어떻게 할건지,
-  // const handleChangeDoneClick = (e : React.) => {
-  //   if()
+  // Done : boolean => !boolean 바꾸기, 기존 순서에서 정렬 어떻게 할건지,
+  // const handleChangeDoneClick = (item) => {
+  //   if(item.id === id)
   // }
 
   // 인덱스나 id가 같은지 비교해보기, 같을때 그 부분에 집어넣게 고민
@@ -101,7 +116,7 @@ function App() {
     if (resData.done === false) {
       setTodoList(replaceTargetChild(todoList, resData));
     } else {
-      setDoneList(replaceTargetChild(todoList, resData));
+      setDoneList(replaceTargetChild(doneList, resData));
     }
     setModalIsOpen(false);
     setAreaText("");
@@ -109,20 +124,28 @@ function App() {
   };
 
   // 수정하기 버튼 클릭 이벤트 함수
-  const handleSubmitEdit = (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handleSubmitEdit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!areaText) return;
     requestEdit();
+    setModalIsOpen(true);
   };
 
+  // 삭제 요청
+
   //  삭제하기 버튼 이벤트 함수
-  const handleClickRemove = () => {};
+  const handleClickRemove = async (todoID: string, Done: boolean) => {
+    const removeRes = await deleteTodo(todoID);
+    if (!removeRes) return;
+    !Done
+      ? setTodoList(todoList.filter((todo) => todo.id !== todoID))
+      : setDoneList(doneList.filter((todo) => todo.id !== todoID));
+  };
 
   // 모달창 구현하기
 
   // 모달 취소버튼 이벤트 함수
-  const closeModal = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const closeModal = () => {
     setModalIsOpen(false);
     setAreaText("");
   };
@@ -160,34 +183,52 @@ function App() {
         {/* 박스내용 넣기 li ul map함수로 toDo 배열생성 */}
         {/* 수정 삭제 버튼*/}
 
+        {/* Todo 고유key값 안넣으면 map돌릴때 child 고유성없다고 에러 */}
         <li className="toDoList">
           <span>ToDo</span>
           {todoList.map((todo) => (
-            // Todo wrapper display flex
-            // Todo 고유key값 안넣으면 map돌릴때 child 고유성없다고 에러
-
             <div key={todo.id}>
               <div>{todo.title}</div>
               <div>{localeDateString(todo.createdAt)}</div>
               <button
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={() => {
                   setModal({ id: todo.id, title: todo.title, done: todo.done });
                   setModalIsOpen(true);
                 }}
               >
                 수정하기
               </button>
-              <button onClick={handleClickRemove}>삭제하기</button>
+              <button onClick={() => handleClickRemove(todo.id, todo.done)}>
+                삭제하기
+              </button>
+              <button>완료변경</button>
             </div>
           ))}
         </li>
-
-        <li className="doneList">
+        <li>
           <span>Done</span>
+          {doneList.map((todo) => (
+            <div key={todo.id}>
+              <div>{todo.title}</div>
+              <div>{localeDateString(todo.createdAt)}</div>
+              <button
+                onClick={(e) => {
+                  e.preventDefault;
+                  setModal({ id: todo.id, title: todo.title, done: todo.done });
+                  setModalIsOpen(true);
+                }}
+              >
+                수정하기
+              </button>
+              <button onClick={() => handleClickRemove(todo.id, todo.done)}>
+                삭제하기
+              </button>
+              <button>미완료변경</button>
+            </div>
+          ))}
         </li>
       </div>
-      {/* 모달창 어떻게 구현할지.... */}
+      {/* 모달창 어떻게 구현할지....*/}
       {/* 클릭한 toDo의 ID값 지정해서 연결? */}
       {/* 버튼 이벤트 추가하기 */}
       <div>
