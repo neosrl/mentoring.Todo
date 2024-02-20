@@ -31,12 +31,11 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Path */
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
-      "@components/*": ["src/components/*"]
+      "@/*": ["src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
